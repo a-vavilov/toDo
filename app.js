@@ -90,6 +90,7 @@ function taskListDoublebClickHandler(e) {
 }
 
 function btnAddTaskHandler(e) {
+    if(!todo__taskInput.value) return
     let task = todo__taskInput.value
     todo__taskList.append(listItemCreate(task))
     todo__taskInput.value = ''
