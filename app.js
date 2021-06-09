@@ -1,291 +1,282 @@
-// UI ELEMENTS
-const todo__taskList = document.querySelector('.todo__taskList')
-const todo__taskInput = document.querySelector('.todo__taskInput')
-const todo__btnAddTask = document.querySelector('.todo__btnAdd')
-const todo__btnClrAll = document.querySelector('.todo__btnClrAll')
-
-
-// RESERVED VARIABLES
-let clickDelay
-
-
-const tasks = [
-    {
-    task:'My task',
-    id: 'task-id',
-    done: true,
-    }
-]
-
-renderAllTasks(tasks)
-
-
-// EVENT LISTENERS
-todo__taskInput.addEventListener('keypress', taskInputKeypressHandler)
-
-todo__btnAddTask.addEventListener('click', btnAddTaskHandler)
-
-todo__btnClrAll.addEventListener('click', btnClrAllHandler)
-
-todo__taskList.addEventListener('click', taskListClickHandler)
-
-todo__taskList.addEventListener('dblclick', taskListDoublebClickHandler)
-
-todo__taskList.addEventListener('focusout', taskListFocusoutHandler)
-
-// FUNCTIONS
-function renderAllTasks(tasks) {
-    let fragment = document.createDocumentFragment()
-    tasks.forEach((task) => {
-        const li = listItemCreate(task)
-        fragment.append(li)
-    });
-    todo__taskList.append(fragment)
+class ToDo {
+  constructor(text) {
+    this.text = text,
+    this.isComplited = false
+    this.id = `task-${Math.random()}`
+  }
 }
 
-function btnAddTaskHandler(e) {
-    if(!todo__taskInput.value) {
-        return
+let a = new ToDo('buy milk')
+let b = new ToDo('create app')
+let c = new ToDo('homework')
+let d = new ToDo('repair bicycle')
+
+class ToDoList {
+  constructor(selectedHtmlElement) {
+    this.tasks = [a, b, c, d,]
+    this.selectedHtmlElement = selectedHtmlElement || document.body
+    this.render(this.tasks)
+  }
+
+  render(chosenTaskArr){
+    this.selectedHtmlElement.innerHTML = ''
+    this.addFormForAddingTasks()
+    this.addListWithTasks(chosenTaskArr)
+  }
+
+  addTaskToList(text) {
+    if (text == '' || text == null) {
+      alert('There isnt any task to add!')
+    } else {
+      this.tasks.push(new ToDo(text))
     }
+    this.render(this.tasks)
+  }
 
-    const taskValue = todo__taskInput.value
+  addListWithTasks(chosenTaskArr) {
+    console.log(chosenTaskArr)
+    const ul = document.createElement('ul')
+    const btnClrAll = document.createElement('button')
 
-    const task = createNewTask(taskValue)
-    todo__taskList.append(listItemCreate(task))
-    todo__taskInput.value = ''
-}
+    ul.className = 'todo-list'
 
-function taskInputKeypressHandler(e) {
-    if(e.which === 13) {
-        e.preventDefault()
+    btnClrAll.classList.add('clear-all-btn')
+    btnClrAll.textContent = 'Clear'
 
-        if(!todo__taskInput.value) {
-            return
-        }
-
-        const taskValue = todo__taskInput.value
-
-        const task = createNewTask(taskValue)
-        todo__taskList.append(listItemCreate(task))
-        todo__taskInput.value = ''
-    }
-}
-
-function taskEditKeypressHandler (e) {
-    if(e.which === 13) {
-        todo__taskInput.focus()
-    }
-}
-
-function listItemCreate({ task, id, done }) {
-    const li = document.createElement('li')
-    li.setAttribute('data-task-id', id)
-    li.classList.add('taskItem')
-
-
-    const btn = document.createElement('button')
-    btn.classList.add('todo__btnDeleteTask')
-    btn.textContent = 'X'
-
-    const checkbox = document.createElement('input')
-    checkbox.setAttribute('type', 'checkbox')
-    if(done) {
+    chosenTaskArr.forEach((task, taskIndex) => {
+      const li = document.createElement('li')
+      li.classList.add('task-item')
+      li.setAttribute('data-task-id', task.id)
+  
+      const removeTaskBtn = document.createElement('button')
+      removeTaskBtn.classList.add('delete-task-button')
+      removeTaskBtn.textContent = 'X'
+  
+      const checkbox = document.createElement('input')
+      checkbox.setAttribute('type', 'checkbox')
+      if(task.isComplited) {
+          checkbox.setAttribute('checked', '')
+      }
+      checkbox.classList.add('task-checkbox')
+  
+      const taskText = document.createElement('span')
+      taskText.classList.add('task-text')
+      taskText.textContent = task.text
+      if(task.isComplited) {
         checkbox.setAttribute('checked', '')
-    }
-    checkbox.classList.add('taskCheckbox')
+        taskText.classList.toggle('task-done')
+      }
 
-    const span = document.createElement('span')
-    span.classList.add('taskText')
-    span.textContent = task
+      taskText.addEventListener('click', (e) => {
+        const closestParent = e.target.closest('[data-task-id]')
+        const identificator = closestParent.dataset.taskId
+        if(clickDelay) clearTimeout(clickDelay)
 
-    if(done) {
-        checkbox.setAttribute('checked', '')
-        span.classList.toggle('taskDone')
-    }
+        clickDelay = setTimeout(() => {
+          if(e.target.previousElementSibling.checked) {
+            e.target.classList.toggle('task-done')
+            e.target.previousElementSibling.checked = false
+            this.tasks.forEach(task => {
+              if(task.id === identificator) {
+                let index = this.tasks.indexOf(task, 0)
+                task.isComplited = false
+              }
+            })  
+          } else {
+            e.target.classList.toggle('task-done')
+            e.target.previousElementSibling.checked = true
+            this.tasks.forEach(task => {
+              if(task.id === identificator) {
+                let index = this.tasks.indexOf(task, 0)
+                task.isComplited = true
+              }
+            })  
+          }
+        }, 180)
+        console.log(clickDelay)
+      })
 
-
-    li.append(btn)
-    li.append(checkbox)
-    li.append(span)
-
-    return li
-}
-
-function taskListClickHandler({ target }){
-    const closestParent = target.closest('[data-task-id]')
-    const identificator = closestParent.dataset.taskId
+      taskText.addEventListener('dblclick',(e) => {
+        const closestParent = e.target.closest('[data-task-id]')
+        const identificator = closestParent.dataset.taskId
     
-    if(clickDelay) clearTimeout(clickDelay)
-    
-    // checkboxClick
-    if(target.classList.contains('taskCheckbox')) {
-        if(target.checked) {
-            target.nextElementSibling.classList.toggle('taskDone')
-            tasks.forEach(task => {
-                if(task.id === identificator) {
-                    index = tasks.indexOf(task, 0)
-                    task.done = true
-                } 
-            })
-    
-        } else {
-            target.nextElementSibling.classList.toggle('taskDone')
-
-            tasks.forEach(task => {
-                if(task.id === identificator) {
-                    index = tasks.indexOf(task, 0)
-                    task.done = false
-                } 
-            })
-        }
-    }
-    
-    //dltBtnClick
-    if(target.classList.contains('todo__btnDeleteTask')) {
-        closestParent.remove()
-        
-        tasks.forEach(task => {
-            if(task.id === identificator) {
-                index = tasks.indexOf(task, 0)
-                tasks.splice(index, 1)
-            } 
-        })
-    }
-    
-    //taskTextClick
-    clickDelay = setTimeout(() => {
-        if(target.classList.contains('taskText')) {
-            if(target.previousElementSibling.checked) {
-                target.classList.toggle('taskDone')
-                target.previousElementSibling.checked = false
-                
-                tasks.forEach(task => {
-                    if(task.id === identificator) {
-                        index = tasks.indexOf(task, 0)
-                        task.done = false
-                    } 
-                })
-    
-            } else {
-                target.classList.toggle('taskDone')
-                target.previousElementSibling.checked = true
-                
-                tasks.forEach(task => {
-                    if(task.id === identificator) {
-                        index = tasks.indexOf(task, 0)
-                        task.done = true
-                    } 
-                })
-    
-            }
-        }
-    }, 180)
-}
-
-function taskListDoublebClickHandler(e) {
-    const closestParent = e.target.closest('[data-task-id]')
-    const identificator = closestParent.dataset.taskId
-
-    if(e.target.classList.contains('taskText')) {
         clearTimeout(clickDelay)
         e.target.setAttribute('contenteditable', 'true')  
         e.target.focus()
-    }
-    if(document.activeElement.classList.contains('taskText')) {
-        todo__taskList.removeEventListener('click', taskListClickHandler)
-        todo__taskList.addEventListener('keypress', taskEditKeypressHandler)
-    }
+      })
 
+      removeTaskBtn.addEventListener('click', (e) => {
+        const closestParent = e.target.closest('[data-task-id]')
+        const identificator = closestParent.dataset.taskId
 
-}
+        closestParent.remove()
+          
+        this.tasks.forEach(task => {
+          if(task.id === identificator) {
+            let index = this.tasks.indexOf(task, 0)
+            this.tasks.splice(index, 1)
+          } 
+        })
+      })
 
-function modalAlertClickHandler(e) {
-    if(e.target.classList.contains('modal') || e.target.classList.contains('modal__ok-btn')) {
-        closeModal(e)
-    }
-}
+      taskText.addEventListener('focusout', (e) => {
+        const closestParent = e.target.closest('[data-task-id]')
+        const identificator = closestParent.dataset.taskId
+    
+        e.target.setAttribute('contenteditable', 'false')
+    
+        this.tasks.forEach(task => {
+            if(task.id === identificator) {
+                let index = this.tasks.indexOf(task, 0)
+                task.text = e.target.textContent
+            } 
+        })    
+      })
 
-function modalConfirmClickHandler(e) {
-    if(e.target.classList.contains('modal__ok-btn')) {
-        todo__taskList.innerHTML = ''
-        closeModal(e)
-    } else if(e.target.classList.contains('modal__cancel-btn') || e.target.classList.contains('modal')) {
-        closeModal(e)
-    }
-}   
+      taskText.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') {
+          e.preventDefault()
+          e.target.blur()
+        }
+      })
 
-function createNewTask(todo, id) {
-    let newTask = {
-        task: todo,
-        id: `task-${id || Math.random().toFixed(9)}`,
-        done: false,
-    }
-    tasks.push(newTask)
-    return { ...newTask }
-}
+      checkbox.addEventListener('click', (e) => {
+        const closestParent = e.target.closest('[data-task-id]')
+        const identificator = closestParent.dataset.taskId
 
-function btnClrAllHandler(e) {
-    if(todo__taskList.children.length < 1) {
-        modalAlert('Task list is already empty!')
-        return
-    }
-    modalConfirm('Are you sure, that you want to clear the task list?') 
-    tasks.splice(0, tasks.length)
-}
+        if(e.target.checked) {
+          e.target.nextElementSibling.classList.toggle('task-done')
+          this.tasks.forEach(task => {
+            if(task.id === identificator) {
+              let index = this.tasks.indexOf(task, 0)
+              task.done = true
+            } 
+          })
+      
+          } else {
+              e.target.nextElementSibling.classList.toggle('task-done')
+    
+              this.tasks.forEach(task => {
+                if(task.id === identificator) {
+                  let index = this.tasks.indexOf(task, 0)
+                  task.done = false
+                } 
+              })
+          }
+      })
 
-function taskListFocusoutHandler(e) {
-    const closestParent = e.target.closest('[data-task-id]')
-    const identificator = closestParent.dataset.taskId
+      li.append(removeTaskBtn)
+      li.append(checkbox)
+      li.append(taskText)
 
-    e.target.setAttribute('contenteditable', 'false')
-
-    tasks.forEach(task => {
-        if(task.id === identificator) {
-            index = tasks.indexOf(task, 0)
-            task.task = e.target.textContent
-        } 
+      ul.appendChild(li)
     })
 
-    todo__taskList.addEventListener('click', taskListClickHandler)
-    todo__taskList.removeEventListener('keypress', taskEditKeypressHandler)
+    btnClrAll.addEventListener('click', (e) => {
+        if(this.tasks.length < 1) {
+          this.drawModalAlert()
+          return
+        }
+        this.drawModalConfirm()
+    })
+
+
+    this.selectedHtmlElement.append(ul)
+    this.selectedHtmlElement.append(btnClrAll)
+  }
+
+  addFormForAddingTasks() {
+    const input = document.createElement('input')
+    const addBtn = document.createElement('button')
+
+    input.className = 'add-task--input'
+    input.autofocus = true
+    input.placeholder = 'Add Task'
+
+    addBtn.innerText = 'ADD'
+    addBtn.classList.add('add-task-btn')
+
+    addBtn.addEventListener('click', () => this.addTaskToList(input.value))
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') {
+        e.preventDefault()
+        this.addTaskToList(input.value)
+      }
+    })
+
+    this.selectedHtmlElement.appendChild(input)
+    this.selectedHtmlElement.appendChild(addBtn)
+  }
+
+  drawModalAlert() {
+    let modal = document.createElement('div')
+    modal.innerHTML = 
+    `
+    <div class="modal modal__alert">
+      <div class="modal__window">
+        <div class="modal__container">
+          <div class="modal__text-container">
+            <p class="modal__text">
+              Task list is already empty!
+            </p>
+          </div>
+          <div class="modal__btn-container">
+            <button class="modal__ok-btn">
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+    modal.addEventListener('click', (e) => {
+      if(e.target.classList.contains('modal__ok-btn')) {
+        modal.innerHTML = ''
+      }
+    })
+
+    this.selectedHtmlElement.append(modal)
+  }
+
+  drawModalConfirm() {
+    let modalConf = document.createElement('div')
+    modalConf.innerHTML = 
+    `
+    <div class="modal modal__confirm">
+      <div class="modal__window">
+        <div class="modal__container">
+          <div class="modal__text-container">
+            <p class="modal__text">
+              Are you sure, that you want to clear the task list?
+            </p>
+          </div>
+          <div class="modal__btn-container">
+            <button class="modal__cancel-btn">
+              Cancel
+            </button>
+            <button class="modal__ok-btn">
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+    modalConf.addEventListener('click', (e) => {
+      let ul = document.querySelector('todo-list')
+      if(e.target.classList.contains('modal__ok-btn')) {
+        this.tasks.splice(0, this.tasks.length)
+        this.render(this.tasks)
+        modalConf.innerHTML = ''
+      } else if((e.target.classList.contains('modal__cancel-btn'))){
+        modalConf.innerHTML = ''
+      }
+    })
+
+    this.selectedHtmlElement.append(modalConf)
+  }
 }
 
-function modalAlert(text) {
-    let modal = document.querySelector('.modal.modal__alert')
-    let modalText = document.querySelector('.modal__text')
-
-    modalText.textContent = text
-    modal.style.visibility = 'visible'
-
-    modal.addEventListener('click', modalAlertClickHandler)
-}
-
-function modalConfirm(text) {
-    let modal = document.querySelector('.modal.modal__confirm')
-    let okBtn = document.querySelector('.modal__ok-btn')
-    let cancelBtn = document.querySelector('.modal__cancel-btn')
-    let modalText = document.querySelector('.modal__text')
-
-
-    modalText.textContent = text
-
-    modal.style.visibility = 'visible'
-
-    modal.addEventListener('click', modalConfirmClickHandler)
-    
-    okBtn.addEventListener('click', modalConfirmClickHandler)
-    cancelBtn.addEventListener('click', closeModal)
-}
-
-function closeModal(e) {
-    let modalAlert = document.querySelector('.modal.modal__alert')
-    let modalConfirm = document.querySelector('.modal.modal__confirm')
-    let cancelBtn = document.querySelector('.modal__cancel-btn')
-    let okBtn = document.querySelector('.modal__cancel-btn')
-
-    modalAlert.style.visibility = 'hidden'
-    modalConfirm.style.visibility = 'hidden'
-
-    modalConfirm.removeEventListener('click', modalConfirmClickHandler)
-    modalAlert.removeEventListener('click', modalAlertClickHandler)
-}
+let clickDelay
+let someDiv = document.querySelector('.todo')
+const todo = new ToDoList(someDiv)

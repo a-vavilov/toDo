@@ -1,5 +1,5 @@
 
-/*/////////////////////////////////// STYLES RESET START ///////////////////////////////////*/
+/* /////////////////////////////////// STYLES RESET START /////////////////////////////////// */
 *,
 *::before,
 *::after {
@@ -56,63 +56,37 @@ select {
 
 body {
     font-size: 26px;
-    /* background-color: indianred; */
     background-image: linear-gradient(#ff6161,#ff768c);
     background-repeat: no-repeat;
     font-family: sans-serif;
     color: #0f222d;
+    display:flex;
+    justify-content: center;
 }
 
 /* TODO SECTION */
-.todo__title {
-    font-size: 40px;
-    color: white;
-}
 
-.todo__header {
-    text-align: center;
-    padding-top: 1%;
-}
-
-.todo__main-container {
-    display: flex;
-    flex-direction: column;
-    padding: 0 27%;
-}
-
-.todo__addTaskContainer {
-    display: flex;
-    justify-content: space-between;
-    padding: 0 0 4%;
-}
-
-.todo__taskListContainer {
-    display: flex;
-    flex-direction: column;  
-    background-color: white;
-    padding: 5% 10%;
-}
-
-.todo__btnClrAll {
+.clear-all-btn {
     background-color: white;
     color: red;
     align-self: flex-end;
-    margin: 2% 0 0 0;
+    margin: 2% 0 2% 84%;
     border: none;
     cursor: pointer;
 }
 
-.todo__btnDeleteTask {
+.delete-task-button {
     background-color: red;
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 10px;
-    margin: 0 3% 0 0
+    margin: 0 3% 0 0;
 }
 
-.todo__btnAdd {
+.add-task-btn {
     width: 20%;
+    height: 10vh;
     font-weight: bold;
     border: none;
     background-color: white;
@@ -120,34 +94,30 @@ body {
     cursor: pointer;
 }
 
-.todo__taskInput {
+.add-task--input {
     width: 80%;
+    height: 10vh;
     border: none;
     padding: 3%;
 }
 
-.todo__taskList {
-    display: flex;
-    flex-direction: column;  
-    justify-content: space-between;
-}
-
-.taskCheckbox {
+.task-checkbox {
     transform: scale(1.7)
 }
 
-.taskItem {
+.task-item {
     border-bottom: solid 1px skyblue;
     padding: 5% 0%;
+    margin: 0 9%;
 }
 
-.taskText {
-    color: grey;
+.task-text {
+    color: black;
     padding: 6px 3px;
     margin: 0 0 0 3%;
 }
 
-.taskDone {
+.task-done {
     text-decoration: line-through;
     color: red;
 
@@ -162,14 +132,6 @@ body {
     background-color: rgba(0, 0, 0, 0.5);
     top: 0;
     left: 0;
-}
-
-.modal.modal__confirm {
-    visibility: hidden;
-}
-
-.modal.modal__alert {
-    visibility: hidden;
 }
 
 .modal__window {
@@ -203,10 +165,12 @@ body {
     align-self: flex-end;
 }
 
-.modal__ok-btn {
-
-}
-
 .modal__cancel-btn {
     margin: 0 8px 0 0;
+}
+
+.todo {
+    background-color: white;
+    width: 65vw;
+    height: 50%;
 }
