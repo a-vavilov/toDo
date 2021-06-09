@@ -6,6 +6,79 @@ class ToDo {
   }
 }
 
+class Modal {
+  constructor(text) {
+    this.text = text
+  }
+  drawModalAlert() {
+    let modal = document.createElement('div')
+    modal.innerHTML = 
+    `
+    <div class="modal modal__alert">
+      <div class="modal__window">
+        <div class="modal__container">
+          <div class="modal__text-container">
+            <p class="modal__text">
+              ${this.text}
+            </p>
+          </div>
+          <div class="modal__btn-container">
+            <button class="modal__ok-btn">
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+    modal.addEventListener('click', (e) => {
+      if(e.target.classList.contains('modal__ok-btn')) {
+        modal.outerHTML = ''
+      }
+    })
+
+    document.body.append(modal)
+  }
+
+  drawModalConfirm(arrowFunctionOkHandler, arrowFuncCancelHandler = console.log) {
+    let trueOrFalse
+    let modalConf = document.createElement('div')
+    modalConf.innerHTML = 
+    `
+    <div class="modal modal__confirm">
+      <div class="modal__window">
+        <div class="modal__container">
+          <div class="modal__text-container">
+            <p class="modal__text">
+              ${this.text}
+            </p>
+          </div>
+          <div class="modal__btn-container">
+            <button class="modal__cancel-btn">
+              Cancel
+            </button>
+            <button class="modal__ok-btn">
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    `
+    modalConf.addEventListener('click', (e) => {
+      if(e.target.classList.contains('modal__ok-btn')) {
+        modalConf.outerHTML = ''
+        arrowFunctionOkHandler()
+      } else if((e.target.classList.contains('modal__cancel-btn'))){
+        modalConf.outerHTML = ''
+        arrowFuncCancelHandler()
+      }
+    })
+    document.body.append(modalConf)
+    return trueOrFalse
+  }
+}
+
 let a = new ToDo('buy milk')
 let b = new ToDo('create app')
 let c = new ToDo('homework')
@@ -26,7 +99,8 @@ class ToDoList {
 
   addTaskToList(text) {
     if (text == '' || text == null) {
-      alert('There isnt any task to add!')
+      let modalAlert = new Modal('There isnt any task to add!')
+      modalAlert.drawModalAlert()
     } else {
       this.tasks.push(new ToDo(text))
     }
@@ -34,7 +108,6 @@ class ToDoList {
   }
 
   addListWithTasks(chosenTaskArr) {
-    console.log(chosenTaskArr)
     const ul = document.createElement('ul')
     const btnClrAll = document.createElement('button')
 
@@ -173,11 +246,18 @@ class ToDoList {
     })
 
     btnClrAll.addEventListener('click', (e) => {
-        if(this.tasks.length < 1) {
-          this.drawModalAlert()
-          return
-        }
-        this.drawModalConfirm()
+      let toDoModalAlert = new Modal('task list is already empty')
+      let toDoMadalConfirm = new Modal('R u sure that u wanna clear task list?')
+      if(this.tasks.length < 1) {
+        // this.drawModalAlert()
+        toDoModalAlert.drawModalAlert()
+        return
+      }
+      toDoMadalConfirm.drawModalConfirm(() => {
+        this.tasks.splice(0, this.tasks.length)
+        this.render(this.tasks)
+      })
+      // this.drawModalConfirm()
     })
 
 
@@ -206,74 +286,6 @@ class ToDoList {
 
     this.selectedHtmlElement.appendChild(input)
     this.selectedHtmlElement.appendChild(addBtn)
-  }
-
-  drawModalAlert() {
-    let modal = document.createElement('div')
-    modal.innerHTML = 
-    `
-    <div class="modal modal__alert">
-      <div class="modal__window">
-        <div class="modal__container">
-          <div class="modal__text-container">
-            <p class="modal__text">
-              Task list is already empty!
-            </p>
-          </div>
-          <div class="modal__btn-container">
-            <button class="modal__ok-btn">
-              Ok
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    `
-    modal.addEventListener('click', (e) => {
-      if(e.target.classList.contains('modal__ok-btn')) {
-        modal.innerHTML = ''
-      }
-    })
-
-    this.selectedHtmlElement.append(modal)
-  }
-
-  drawModalConfirm() {
-    let modalConf = document.createElement('div')
-    modalConf.innerHTML = 
-    `
-    <div class="modal modal__confirm">
-      <div class="modal__window">
-        <div class="modal__container">
-          <div class="modal__text-container">
-            <p class="modal__text">
-              Are you sure, that you want to clear the task list?
-            </p>
-          </div>
-          <div class="modal__btn-container">
-            <button class="modal__cancel-btn">
-              Cancel
-            </button>
-            <button class="modal__ok-btn">
-              Ok
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    `
-    modalConf.addEventListener('click', (e) => {
-      let ul = document.querySelector('todo-list')
-      if(e.target.classList.contains('modal__ok-btn')) {
-        this.tasks.splice(0, this.tasks.length)
-        this.render(this.tasks)
-        modalConf.innerHTML = ''
-      } else if((e.target.classList.contains('modal__cancel-btn'))){
-        modalConf.innerHTML = ''
-      }
-    })
-
-    this.selectedHtmlElement.append(modalConf)
   }
 }
 
