@@ -51,6 +51,7 @@ select {
   font: inherit;
 }
 
+
 /* STYLES RESET END */
 
 body {
@@ -64,23 +65,38 @@ body {
 }
 
 /* TODO SECTION */
-.todo {
-    background-color: white;
-    width: 65vw;
-    height: 50%;
-    margin: 1% 0 0 0;
+
+.todo-list {
+    height: 100%;
+    width: 500px;
+    margin: 10px;
 }
 
-.clear-all-btn {
+.todo-list__title {
+    text-align: center;
+    color: white;
+    margin: 19px 0 19px 0;
+}
+
+.todo-list__ul-container {
     background-color: white;
-    color: red;
-    align-self: flex-end;
-    margin: 2% 0 2% 84%;
+}
+
+.todo-list__ul {
+    background-color: white;
+}
+
+.todo-list__clear-all-btn {
+    background-color: white;
+    color: indianred;
     border: none;
     cursor: pointer;
+    position: relative;
+    left: 77%;
+    margin: 2% -0 1% 0;
 }
 
-.delete-task-button {
+.todo-list__delete-task-button {
     background-color: red;
     color: white;
     border: none;
@@ -89,7 +105,7 @@ body {
     margin: 0 3% 0 0;
 }
 
-.add-task-btn {
+.todo-list__add-task-btn {
     width: 20%;
     height: 10vh;
     font-weight: bold;
@@ -97,37 +113,75 @@ body {
     background-color: white;
     color: skyblue;
     cursor: pointer;
-    border-bottom: solid 1px black;
 }
 
-.add-task--input {
+.todo-list__add-task-input {
     width: 80%;
     height: 10vh;
     border: none;
     padding: 3%;
-    border-bottom: solid 1px black;
+    margin: 0 0 4% 0;
+    outline: 0 !important;
 }
 
-.task-checkbox {
+.todo-list__task-checkbox {
     transform: scale(1.7)
 }
 
-.task-item {
+.todo-list__task-item {
     border-bottom: solid 1px skyblue;
     padding: 5% 0%;
     margin: 0 9%;
 }
 
-.task-text {
-    color: black;
+.todo-list__task-text {
+    color: grey;
     padding: 6px 3px;
     margin: 0 0 0 3%;
 }
 
-.task-done {
+.todo-list__task-done {
     text-decoration: line-through;
     color: red;
 
+}
+
+.todo-list__sign-in-btn {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    color: skyblue;
+    border: none;
+    background-color: transparent;
+    font-size: 37px;
+}
+
+/* FormLogin SECTION */
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    height: 50%;
+    width: 40%;
+}
+
+.form-login__title {
+    text-align: center;
+    color: white;
+    margin: 16px 0 16px 0;
+}
+
+.form-login__input {
+    margin: 0  0 13px 0;
+    border: none;
+    padding: 10px;
+}
+
+.form-login__btn-submit {
+    background-color: white;
+    font-weight: bold;
+    color: skyblue;
 }
 
 /* modal SECTION */
@@ -151,7 +205,7 @@ body {
     top: 8%;
     width: 39%;
     height: 30%;
-    border: solid 4px red;
+    border: solid 4px indianred   ;
 }
 
 .modal__container {
@@ -164,7 +218,7 @@ body {
 }
 
 .modal__text {
-    color: red;
+
 }
 
 .modal__btn-container {
