@@ -51,7 +51,6 @@ select {
   font: inherit;
 }
 
-
 /* STYLES RESET END */
 
 body {
@@ -60,7 +59,7 @@ body {
     background-repeat: no-repeat;
     font-family: sans-serif;
     color: #0f222d;
-    display:flex;
+    display: flex;
     justify-content: center;
 }
 
@@ -93,7 +92,7 @@ body {
     cursor: pointer;
     position: relative;
     left: 77%;
-    margin: 2% -0 1% 0;
+    margin: 2% 0 1% 0;
 }
 
 .todo-list__delete-task-button {

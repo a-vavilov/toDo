@@ -1,6 +1,12 @@
+const appState = {
+  currentRoute: null,
+  currentTasks: null,
+  isModalOpen: null,
+}
+
 class EventEmitter {
   constructor() {
-    this.events = []
+    this.events = {}
   }
   on = (someEvent, func) => {
     if(!this.events[someEvent]) {
@@ -8,12 +14,12 @@ class EventEmitter {
     }
     this.events[someEvent].push(func)
   }
-  emit = (someEvent) => {
+  emit = (someEvent, data) => {
     console.log(this.events)
     const event = this.events[someEvent]
     if(event) {
       event.forEach(func => {
-        func()
+        func(data)
       })
     }
   }
@@ -22,13 +28,20 @@ class EventEmitter {
 class Routing {
   constructor(props) {
     this.body = document.body
-    // this.currentRoute = props.currentRoute
     this.currentRoute = 'form'
+    this.appState = appState
+    this.appStateEventEmitter = new EventEmitter
   }
-
   goTo = (newRoute, data) => {
     this.currentRoute = newRoute
     this.render(data)
+  }
+
+  saveToAppState = (data) => {
+    this.appStateEventEmitter.on('setRoute', (data) => {
+      this.appState.currentRoute = data
+    })
+    this.appStateEventEmitter.emit('setRoute', data)
   }
 
   render = (data) => {
@@ -36,12 +49,12 @@ class Routing {
       case 'form':
       const form = (new FormLogin({ goTo: this.goTo })).render()
       this.body.append(form)
+      this.saveToAppState(this.currentRoute)
       break
       case 'toDo':
-      const toDo = (new ToDoList({ goTo: this.goTo, tasks: data })).render()
-      console.log(toDo)
-      console.log(this.body)
+      const toDo = (new ToDoList({ goTo: this.goTo, tasks: data, appState: this.appState })).render()
       this.body.append(toDo)
+      this.saveToAppState(this.currentRoute)
       break
     }
   }
@@ -65,13 +78,13 @@ class FormLogin {
       return isValidInput
     })
     if(isValidForm) {
-      console.log(this.goTo)
-      this.goTo('toDo')
+      this.goTo('toDo',)
     } else {
       let modal = new Modal(
         { 
         text:'Please, fill in all fields correctly! Email must be like "email@email.com". Password minimum length is 4 symbols!', 
-        type: 'alert'
+        type: 'alert',
+        appState: this.appState
         }
       )
       this.form.reset()
@@ -84,8 +97,6 @@ class FormLogin {
     let regExpName = el.dataset.required
 
     return this.regExpDic[regExpName].test(el.value)
-    // console.log(regExpName)
-    // console.log(this.inputs)
   }
 
   render() {
@@ -132,11 +143,14 @@ class Modal {
   constructor(props) {
     this.text = props.text
     this.type = props.type
+    this.appState = props.appState
+    this.appStateEventEmitter = new EventEmitter
     this.okBtnHandler = props.okBtnHandler
   }
 
   close = (e) => {
-    this.modal.outerHTML = ''
+    this.modal.remove()
+    this.saveToAppState(false)
   }
 
   okClose = () => {
@@ -144,6 +158,14 @@ class Modal {
       this.okBtnHandler()
     }
     this.close()
+    this.saveToAppState(false)
+  }
+
+  saveToAppState = (data) => {
+    this.appStateEventEmitter.on('isModalOpen', (data) => {
+      this.appState.isModalOpen = data
+    })
+    this.appStateEventEmitter.emit('isModalOpen', data)
   }
 
   render = () => {
@@ -185,6 +207,8 @@ class Modal {
   
       this.cancelBtn.addEventListener('click', this.close)
       this.okBtn.addEventListener('click', this.okClose)
+
+      this.saveToAppState(true)
       
       return this.modal
 
@@ -219,6 +243,8 @@ class Modal {
       this.modalBtnContainer.append(this.okBtn)
   
       this.okBtn.addEventListener('click', this.okClose)
+
+      this.saveToAppState(true)
 
       return this.modal
     }
@@ -317,6 +343,8 @@ class ToDoList {
   constructor(props) {
     this.body = document.body
     this.goTo = props.goTo
+    this.appState = props.appState
+    this.appStateEventEmitter = new EventEmitter
     this.tasks = props.tasks || []
   }
 
@@ -337,6 +365,7 @@ class ToDoList {
       }
     )
     this.tasks.push(todo)
+    console.log(this.tasks)
     this.render()
     this.input.focus()
   }
@@ -376,8 +405,9 @@ class ToDoList {
   }
 
   clearTodoList = (e) => {
-    this.ul.innerHTML = ''
     this.tasks = []
+
+    this.render()
   }
 
   openModalConfirm = (e) => {
@@ -385,7 +415,8 @@ class ToDoList {
       { 
       text: 'r u sure that u wanna clear this todo list?', 
       okBtnHandler:this.clearTodoList, 
-      type: 'confirm'
+      type: 'confirm',
+      appState: this.appState
       }
     )
     this.body.append(modal.render())
@@ -396,18 +427,27 @@ class ToDoList {
     let modal = new Modal(
       {
       text: modalText, 
-      type: 'alert'
+      type: 'alert',
+      appState: this.appState
       }
     )
     this.body.append(modal.render())
     modal.okBtn.focus()
   }
 
-    signInHandler = () => {
-      this.body.innerHTML = ''
-      this.goTo('form')
-    }
+  signInHandler = () => {
+    this.body.innerHTML = ''
+    this.goTo('form')
+  }
 
+  saveToAppState = (data) => {
+    this.appStateEventEmitter.on('setTasks', (data) => {
+      this.appState.currentTasks = data
+    })
+    this.appStateEventEmitter.emit('setTasks', data)
+  }
+
+  
   render = () => {
     this.body.innerHTML = ""
     this.container = document.createElement('div')
@@ -471,15 +511,17 @@ class ToDoList {
     this.ulContainer.append(this.btnClrAll)
 
     this.tasks.forEach(t => {
+      console.log(t)
       let todo = new ToDo(t)
       this.ul.append(todo.render())
     })
 
+    
     this.body.append(this.container)
 
     this.goTo('todo', this.tasks)
 
-    console.log(this.tasks)
+    this.saveToAppState(this.tasks)
 
     return this.container
   }
