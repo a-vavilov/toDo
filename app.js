@@ -1,9 +1,3 @@
-const appState = {
-  currentRoute: null,
-  currentTasks: null,
-  isModalOpen: null,
-}
-
 class EventEmitter {
   constructor() {
     this.events = {}
@@ -15,7 +9,6 @@ class EventEmitter {
     this.events[someEvent].push(func)
   }
   emit = (someEvent, data) => {
-    console.log(this.events)
     const event = this.events[someEvent]
     if(event) {
       event.forEach(func => {
@@ -25,45 +18,133 @@ class EventEmitter {
   }
 }
 
-class Routing {
-  constructor(props) {
-    this.body = document.body
-    this.currentRoute = 'form'
-    this.appState = appState
-    this.appStateEventEmitter = new EventEmitter
+const eventEmiter = new EventEmitter()
+
+class STORE {
+  constructor() {
+    eventEmiter.on('TODO_ADD', this.onTodoAdd)
+    eventEmiter.on('TODO_REMOVE', this.onTodoRemove)
+    eventEmiter.on('TODO_CLEAR', this.onTodoClear)
+    eventEmiter.on('TODO_COMPLETE', this.onTodoComplete)
+    eventEmiter.on('TODO_UNCOMPLETE', this.onTodoUnComplete)
+    eventEmiter.on('TODO_EDIT', this.onTodoEdit)
+    eventEmiter.on('AUTORIZATION', this.onAutorization)
+    eventEmiter.on('SIGNED_IN', this.onSignedIn)
+    this.appState = {
+      currentRoute: null,
+      currentTasks: null || [],
+    }
   }
-  goTo = (newRoute, data) => {
-    this.currentRoute = newRoute
-    this.render(data)
+  
+  onTodoAdd = (todo) => {
+    this.reducer('TODO_ADD', todo)
+  } 
+
+  onTodoRemove = (id) => {
+    this.reducer('TODO_REMOVE', id)
   }
 
-  saveToAppState = (data) => {
-    this.appStateEventEmitter.on('setRoute', (data) => {
-      this.appState.currentRoute = data
-    })
-    this.appStateEventEmitter.emit('setRoute', data)
+  onTodoClear = () => {
+    this.reducer('TODO_CLEAR')
   }
 
-  render = (data) => {
-    switch(this.currentRoute) {
+  onTodoComplete = (id) => {
+    this.reducer('TODO_COMPLETE', id)
+  }
+
+  onTodoUnComplete = (id) => {
+    this.reducer('TODO_UNCOMPLETE', id)
+  }
+
+  onTodoEdit = (data) => {
+    this.reducer('TODO_EDIT', data)
+  }
+
+  onAutorization = () => {
+    this.reducer('AUTORIZATION')
+  }
+
+  onSignedIn = () => {
+    this.reducer('SIGNED_IN')
+  }
+
+  reducer(action, data) {
+    switch(action) {
+      case 'TODO_ADD': 
+        this.appState.currentTasks.push(data)
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'TODO_REMOVE': 
+        const newState = this.appState.currentTasks = this.appState.currentTasks.filter(task => task.id !== data)
+        this.appState.currentTasks = newState
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'TODO_CLEAR': 
+        this.appState.currentTasks = []
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'TODO_COMPLETE': 
+        this.appState.currentTasks.forEach(task => {
+          if(task.id === data) {
+            task.isComplited = false
+          }
+        })
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'TODO_UNCOMPLETE': 
+        this.appState.currentTasks.forEach(task => {
+          if(task.id === data) {
+            task.isComplited = true
+          }
+        })
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'TODO_EDIT':
+        this.appState.currentTasks.forEach(task => {
+          if(task.id === data.id) {
+            task.text = data.text
+          }
+        })
+        eventEmiter.emit('RERENDER', 'todo')
+        break
+      case 'AUTORIZATION':
+        this.appState.currentState = 'form'
+        eventEmiter.emit('RERENDER', 'form')
+        break
+      case 'SIGNED_IN':
+        this.appState.currentState = 'todo'
+        eventEmiter.emit('RERENDER', 'todo')
+        break  
+    }
+  }
+}
+
+class ROOT {
+  constructor() {
+      eventEmiter.on("RERENDER", this.render)
+      this.body = document.body
+  }
+
+  render = (action) => {
+    switch(action) {
+      case 'todo':
+        this.body.innerHTML = ''
+        const todo = new ToDoList({ appState: this.appState })
+        this.body.append(todo.render())
+        todo.input.focus()
+        break
       case 'form':
-      const form = (new FormLogin({ goTo: this.goTo })).render()
-      this.body.append(form)
-      this.saveToAppState(this.currentRoute)
-      break
-      case 'toDo':
-      const toDo = (new ToDoList({ goTo: this.goTo, tasks: data, appState: this.appState })).render()
-      this.body.append(toDo)
-      this.saveToAppState(this.currentRoute)
-      break
+        this.body.innerHTML = ''
+        const form = new FormLogin()
+        this.body.append(form.render())
+        form.inputEmail.focus()
+        break
     }
   }
 }
 
 class FormLogin {
   constructor(props) {
-    this.body = document.body
-    this.goTo = props.goTo
     this.regExpDic = {
       email: /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{1,5}|[0-9]{1,3})(\]?)$/,
       password: /^[0-9a-zA-Z]{4,}$/,
@@ -78,7 +159,7 @@ class FormLogin {
       return isValidInput
     })
     if(isValidForm) {
-      this.goTo('toDo',)
+      eventEmiter.emit('SIGNED_IN')
     } else {
       let modal = new Modal(
         { 
@@ -95,7 +176,6 @@ class FormLogin {
 
   validate = (el) => {
     let regExpName = el.dataset.required
-
     return this.regExpDic[regExpName].test(el.value)
   }
 
@@ -143,29 +223,19 @@ class Modal {
   constructor(props) {
     this.text = props.text
     this.type = props.type
-    this.appState = props.appState
-    this.appStateEventEmitter = new EventEmitter
+    // this.appState = props.appState
     this.okBtnHandler = props.okBtnHandler
   }
 
   close = (e) => {
     this.modal.remove()
-    this.saveToAppState(false)
   }
 
-  okClose = () => {
+  onOkHandler = () => {
     if(this.okBtnHandler) {
       this.okBtnHandler()
     }
     this.close()
-    this.saveToAppState(false)
-  }
-
-  saveToAppState = (data) => {
-    this.appStateEventEmitter.on('isModalOpen', (data) => {
-      this.appState.isModalOpen = data
-    })
-    this.appStateEventEmitter.emit('isModalOpen', data)
   }
 
   render = () => {
@@ -206,10 +276,8 @@ class Modal {
       this.modalBtnContainer.append(this.okBtn)
   
       this.cancelBtn.addEventListener('click', this.close)
-      this.okBtn.addEventListener('click', this.okClose)
+      this.okBtn.addEventListener('click', this.onOkHandler)
 
-      this.saveToAppState(true)
-      
       return this.modal
 
     } else if(this.type === 'alert') {
@@ -242,9 +310,7 @@ class Modal {
       this.modalContainer.append(this.modalBtnContainer)
       this.modalBtnContainer.append(this.okBtn)
   
-      this.okBtn.addEventListener('click', this.okClose)
-
-      this.saveToAppState(true)
+      this.okBtn.addEventListener('click', this.onOkHandler)
 
       return this.modal
     }
@@ -255,30 +321,23 @@ class ToDo {
   constructor(props) {
     this.text = props.text
     this.isComplited = props.isComplited
-    this.removeTodo = props.removeTodo
-    this.isCompleteTodo = props.isCompleteTodo
-    this.isNotCompletedTodo = props.isNotCompletedTodo
-    this.editTodo = props.editTodo
     this.id = props.id
   }
 
   todoRemove = () => {
-    this.removeTodo(this.id)
+    eventEmiter.emit('TODO_REMOVE', this.id)
   }
 
   todoIsComplete = (e) => {
-    const closestParent = e.target.closest('[data-task-id]')
-    const identificator = closestParent.dataset.taskId
-
     if(this.clickDelay) {
       clearTimeout(this.clickDelay)
     }
 
     this.clickDelay = setTimeout(() => {
       if(e.target.classList.contains('todo-list__task-done') || e.target.hasAttribute('checked')) {
-        this.isCompleteTodo(+identificator)  
+        eventEmiter.emit('TODO_COMPLETE', this.id) 
       } else {
-        this.isNotCompletedTodo(+identificator)  
+        eventEmiter.emit('TODO_UNCOMPLETE', this.id) 
       }
     }, 180)
 
@@ -286,15 +345,13 @@ class ToDo {
 
   todoEdit = (e) => {
     clearTimeout(this.clickDelay)
-    e.target  .setAttribute('contenteditable', 'true')  
+    e.target.setAttribute('contenteditable', 'true')
     e.target.focus()
   }
 
   focusOutTaskHandler = (e) => {
-    const closestParent = e.target.closest('[data-task-id]')
-    const identificator = closestParent.dataset.taskId
-
-    this.editTodo(+identificator, e)
+    e.target.blur()
+    eventEmiter.emit('TODO_EDIT', { id: this.id, text: e.target.textContent })
   }
 
   render = () => {
@@ -342,10 +399,8 @@ class ToDo {
 class ToDoList {
   constructor(props) {
     this.body = document.body
-    this.goTo = props.goTo
-    this.appState = props.appState
-    this.appStateEventEmitter = new EventEmitter
-    this.tasks = props.tasks || []
+    // this.goTo = props.goTo
+    this.appState = store.appState
   }
 
   addTodo = () => {
@@ -355,59 +410,16 @@ class ToDoList {
     }
 
     let todo = new ToDo(
-      { 
-        removeTodo:this.removeTodo,
-        isCompleteTodo: this.isCompleteTodo, 
-        isNotCompletedTodo: this.isNotCompletedTodo, 
-        editTodo: this.editTodo, 
+      {
         text:this.input.value, 
         id: Math.random()
       }
     )
-    this.tasks.push(todo)
-    console.log(this.tasks)
-    this.render()
-    this.input.focus()
-  }
-
-  removeTodo = (id) => {
-    this.tasks = this.tasks.filter(task => task.id !== id)
-
-    this.render()
-  }
-
-  isCompleteTodo = (id) => {
-    this.tasks.forEach(task => {
-      if(task.id === id) {
-        task.isComplited = false
-      }
-    })
-    this.render()
-  }
-
-  isNotCompletedTodo = (id) => {
-    this.tasks.forEach(task => {
-      if(task.id === id) {
-        task.isComplited = true
-      }
-    })
-    this.render()
-  }
-
-  editTodo = (id, e) => {
-    e.target.blur()
-    this.tasks.forEach(task => {
-      if(task.id === id) {
-        task.text = e.target.textContent
-      }
-    })
-    this.render()
+    eventEmiter.emit('TODO_ADD', todo)
   }
 
   clearTodoList = (e) => {
-    this.tasks = []
-
-    this.render()
+    eventEmiter.emit('TODO_CLEAR')
   }
 
   openModalConfirm = (e) => {
@@ -436,17 +448,8 @@ class ToDoList {
   }
 
   signInHandler = () => {
-    this.body.innerHTML = ''
-    this.goTo('form')
+    eventEmiter.emit('AUTORIZATION')
   }
-
-  saveToAppState = (data) => {
-    this.appStateEventEmitter.on('setTasks', (data) => {
-      this.appState.currentTasks = data
-    })
-    this.appStateEventEmitter.emit('setTasks', data)
-  }
-
   
   render = () => {
     this.body.innerHTML = ""
@@ -469,7 +472,6 @@ class ToDoList {
 
     this.input = document.createElement('input')
     this.input.className = 'todo-list__add-task-input'
-    this.input.autofocus = true
     this.input.placeholder = 'Add Task'
 
     this.addBtn = document.createElement('button')
@@ -493,7 +495,7 @@ class ToDoList {
     this.signInBtn.addEventListener('click', this.signInHandler)
 
     this.btnClrAll.addEventListener('click', (e) => {
-      if(this.tasks.length < 1) {
+      if(this.appState.currentTasks.length < 1) {
         e.target.blur()
         this.openModalAlert('Todo list is already empty!')
       } else {
@@ -510,21 +512,15 @@ class ToDoList {
     this.ulContainer.append(this.ul)
     this.ulContainer.append(this.btnClrAll)
 
-    this.tasks.forEach(t => {
-      console.log(t)
+    this.appState.currentTasks.forEach(t => {
       let todo = new ToDo(t)
       this.ul.append(todo.render())
     })
-
-    
-    this.body.append(this.container)
-
-    this.goTo('todo', this.tasks)
-
-    this.saveToAppState(this.tasks)
 
     return this.container
   }
 }
 
-const routing = (new Routing()).render()
+const store = new STORE()
+const app = new ROOT()
+app.render('form')
