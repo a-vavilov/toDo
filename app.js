@@ -204,7 +204,7 @@ class FormLogin {
     this.submitBtn = document.createElement('button')
     this.submitBtn.type = 'submit'
     this.submitBtn.textContent = 'Submit'
-    this.submitBtn.classList.add('btn', 'form-login__btn-submit')
+    this.submitBtn.classList.add('form-login__btn-submit')
 
     this.form.append(this.title)
     this.form.append(this.inputEmail)
@@ -241,7 +241,7 @@ class Modal {
   render = () => {
     if(this.type === 'confirm'){
       this.modal = document.createElement('div')
-      this.modal.classList.add('modal', 'modal__confirm')
+      this.modal.classList.add('modall', 'modal__confirm')
   
       this.modalWindow = document.createElement('div')
       this.modalWindow.classList.add('modal__window')
@@ -282,7 +282,7 @@ class Modal {
 
     } else if(this.type === 'alert') {
       this.modal = document.createElement('div')
-      this.modal.classList.add('modal', 'modal__confirm')
+      this.modal.classList.add('modall', 'modal__confirm')
   
       this.modalWindow = document.createElement('div')
       this.modalWindow.classList.add('modal__window')
@@ -444,6 +444,7 @@ class ToDoList {
       }
     )
     this.body.append(modal.render())
+    console.log(this.body)
     modal.okBtn.focus()
   }
 
@@ -454,33 +455,65 @@ class ToDoList {
   render = () => {
     this.body.innerHTML = ""
     this.container = document.createElement('div')
-    this.container.classList.add('todo-list')
+    this.container.classList.add('todo-list', 'container')
+
+    this.titleRow = document.createElement('div')
+    this.titleRow.classList.add('row')
 
     this.title = document.createElement('h2')
-    this.title.classList.add('todo-list__title')
+    this.title.classList.add('todo-list__title', 'mb-3', 'mt-3', 'col', 'text-center')
     this.title.textContent = 'TO-DO LIST'
 
-    this.ulContainer = document.createElement('div')
-    this.ulContainer.classList.add('todo-list__ul-container')
+    this.addTaskUiRow = document.createElement('div')
+    this.addTaskUiRow.classList.add('todo__input-container', 'mb-3', 'row', 'offset-sm-2')
 
-    this.ul = document.createElement('ul')
-    this.ul.classList.add('todo-list__ul')
-    
-    this.btnClrAll = document.createElement('button')
-    this.btnClrAll.classList.add('todo-list__clear-all-btn')
-    this.btnClrAll.textContent = 'Clear'
+    this.addTaskUiInputCol = document.createElement('div')
+    this.addTaskUiInputCol.classList.add('col-12', 'col-sm-8', 'gx-0')
 
     this.input = document.createElement('input')
     this.input.className = 'todo-list__add-task-input'
     this.input.placeholder = 'Add Task'
 
+    this.addTaskUiAddBtnCol = document.createElement('div')
+    this.addTaskUiAddBtnCol.classList.add('col-12', 'col-sm-2', 'gy-sm-0', 'gy-1', 'gx-0')
+
     this.addBtn = document.createElement('button')
     this.addBtn.textContent = 'ADD'
     this.addBtn.classList.add('todo-list__add-task-btn')
 
+    this.ulRow = document.createElement('div')
+    this.ulRow.classList.add('todo-list__ul-container', 'row', 'offset-sm-2')
+
+    this.ul = document.createElement('ul')
+    this.ul.classList.add('todo-list__ul', 'col-sm-10', 'col-12')
+
+    this.btnClrAllRow = document.createElement('div')
+    this.btnClrAllRow.classList.add('row', 'offset-sm-2')
+
+    this.btnClrAllCol = document.createElement('div')
+    this.btnClrAllCol.classList.add('col-sm-10', 'col-12', 'gx-0', 'bg-white', 'd-flex', 'justify-content-end')
+
+    this.btnClrAll = document.createElement('button')
+    this.btnClrAll.classList.add('todo-list__clear-all-btn')
+    this.btnClrAll.textContent = 'Clear'
+
     this.signInBtn = document.createElement('button')
     this.signInBtn.classList.add('todo-list__sign-in-btn')
     this.signInBtn.textContent = 'Sign in'
+    
+    this.container.append(this.titleRow)
+    this.titleRow.append(this.title)
+    this.container.append(this.addTaskUiRow)
+    this.addTaskUiRow.append(this.addTaskUiInputCol)
+    this.addTaskUiInputCol.append(this.input)
+    this.addTaskUiRow.append(this.addTaskUiAddBtnCol)
+    this.addTaskUiAddBtnCol.append(this.addBtn)
+    this.container.append(this.ulRow)
+    this.ulRow.append(this.ul)
+    this.container.append(this.btnClrAllRow)
+    this.btnClrAllRow.append(this.btnClrAllCol)
+    this.btnClrAllCol.append(this.btnClrAll)
+    this.container.append(this.signInBtn) 
     
     this.input.addEventListener('keypress', (e) => {
       if(e.key === 'Enter') {
@@ -503,14 +536,6 @@ class ToDoList {
         this.openModalConfirm()
       }
     })
-    
-    this.container.append(this.title)
-    this.container.append(this.input)
-    this.container.append(this.addBtn)
-    this.container.append(this.ulContainer)
-    this.container.append(this.signInBtn)
-    this.ulContainer.append(this.ul)
-    this.ulContainer.append(this.btnClrAll)
 
     this.appState.currentTasks.forEach(t => {
       let todo = new ToDo(t)

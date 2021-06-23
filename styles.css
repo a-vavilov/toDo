@@ -54,7 +54,7 @@ select {
 /* STYLES RESET END */
 
 body {
-    font-size: 26px;
+    font-size: 26px !important;
     background-image: linear-gradient(#ff6161,#ff768c);
     background-repeat: no-repeat;
     font-family: sans-serif;
@@ -67,18 +67,19 @@ body {
 
 .todo-list {
     height: 100%;
-    width: 500px;
-    margin: 10px;
+    margin: 80px 10px !important;
 }
 
 .todo-list__title {
+    font-size: 39px;
+    font-weight: bold;
     text-align: center;
     color: white;
     margin: 19px 0 19px 0;
 }
 
 .todo-list__ul-container {
-    background-color: white;
+
 }
 
 .todo-list__ul {
@@ -90,9 +91,7 @@ body {
     color: indianred;
     border: none;
     cursor: pointer;
-    position: relative;
-    left: 77%;
-    margin: 2% 0 1% 0;
+    margin: 2% 3% 1% 0;
 }
 
 .todo-list__delete-task-button {
@@ -101,11 +100,11 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 10px;
-    margin: 0 3% 0 0;
+    margin: 0 18px 0 0;
 }
 
 .todo-list__add-task-btn {
-    width: 20%;
+    width: 100%;
     height: 10vh;
     font-weight: bold;
     border: none;
@@ -115,11 +114,11 @@ body {
 }
 
 .todo-list__add-task-input {
-    width: 80%;
+    width: 100%;
     height: 10vh;
     border: none;
     padding: 3%;
-    margin: 0 0 4% 0;
+    /* margin: 0 0 4% 0; */
     outline: 0 !important;
 }
 
@@ -162,7 +161,7 @@ body {
     flex-direction: column;
     padding: 10px;
     height: 50%;
-    width: 40%;
+    width: 80%;
 }
 
 .form-login__title {
@@ -185,10 +184,12 @@ body {
 
 /* modal SECTION */
 
-.modal {
+.modall {
+    display: flex;
+    justify-content: center;
     position: fixed;
     width: 100%;
-    height: 100%;   
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     top: 0;
     left: 0;
@@ -199,12 +200,10 @@ body {
     justify-content: center;
     align-items: center;
     background-color: white;
-    position: absolute;
-    left: 31%;
-    top: 8%;
-    width: 39%;
-    height: 30%;
-    border: solid 4px indianred   ;
+    margin-top: 80px;
+    width: 75%;
+    height: 45%;
+    border: solid 4px indianred;
 }
 
 .modal__container {
